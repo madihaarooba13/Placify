@@ -65,7 +65,7 @@ export default function AIChatbot() {
   }
 
   return (
-    <div className="min-h-screen bg-sky-50 flex flex-col items-center p-8">
+    <div className="min-h-screen bg-sky-50 flex flex-col items-center p-40">
       <h1 className="text-4xl font-bold mb-6 text-sky-800">AI Chatbot 🤖</h1>
       <div className="w-full max-w-2xl bg-white rounded-2xl shadow-lg flex flex-col overflow-hidden">
         <div ref={chatRef} className="p-4 flex-1 overflow-y-auto h-96 space-y-4">
