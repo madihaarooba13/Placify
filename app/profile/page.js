@@ -204,7 +204,7 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-sky-50 py-28 px-4 flex justify-center">
-      <div className="w-full max-w-3xl bg-white rounded-2xl shadow-lg p-8">
+      <div className="w-full max-w-3xl bg-white rounded-2xl shadow-lg p-8 mt-8">
         <h2 className="text-2xl font-bold text-sky-800 mb-4">Your Profile</h2>
         <p className="text-sm text-gray-500 mb-6">
           Update your information below. Fields with{" "}
