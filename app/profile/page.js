@@ -2,11 +2,14 @@
 
 import React, { useEffect, useState } from "react";
 import { useSession, signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function ProfilePage() {
   const { data: session } = useSession();
+  const router = useRouter();
+
   const [formData, setFormData] = useState({
     name: "",
     username: "",
@@ -87,11 +90,10 @@ export default function ProfilePage() {
     }
   };
 
-  // ✅ Resume upload handler
+  // Resume upload handler
   const handleResumeUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     if (file.size > 5 * 1024 * 1024) {
       toast.warn("Resume too large! Max size 5MB ⚠️");
       return;
@@ -146,6 +148,11 @@ export default function ProfilePage() {
       return;
     }
 
+    if (uploading) {
+      toast.warn("Please wait, resume is still uploading ⏳");
+      return;
+    }
+
     setLoading(true);
     toast.info("Saving your profile...");
 
@@ -160,6 +167,17 @@ export default function ProfilePage() {
 
       if (res.ok) {
         toast.success("Profile saved successfully ✅");
+
+        // Update username globally for Navbar
+        localStorage.setItem("placify_username", formData.username);
+        window.dispatchEvent(
+          new CustomEvent("profileUpdated", { detail: { username: formData.username } })
+        );
+
+        // Redirect after delay
+        setTimeout(() => {
+          router.push("/dashboard");
+        }, 1200);
       } else {
         toast.error(data.message || "Save failed ❌");
       }
@@ -194,8 +212,9 @@ export default function ProfilePage() {
           <span className="text-red-600">*</span> are required.
         </p>
 
-        {/* Basic Info */}
+        {/* ---------- FORM SECTION ---------- */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Email */}
           <div>
             <label className="block text-gray-700 font-medium">Email</label>
             <input
@@ -205,6 +224,7 @@ export default function ProfilePage() {
             />
           </div>
 
+          {/* Username */}
           <div>
             <label className="block text-gray-700 font-medium">
               Username <span className="text-red-600">*</span>
@@ -224,6 +244,7 @@ export default function ProfilePage() {
             )}
           </div>
 
+          {/* Full Name */}
           <div>
             <label className="block text-gray-700 font-medium">
               Full Name <span className="text-red-600">*</span>
@@ -244,6 +265,7 @@ export default function ProfilePage() {
             )}
           </div>
 
+          {/* College */}
           <div>
             <label className="block text-gray-700 font-medium">
               College <span className="text-red-600">*</span>
@@ -256,6 +278,7 @@ export default function ProfilePage() {
             />
           </div>
 
+          {/* Branch */}
           <div>
             <label className="block text-gray-700 font-medium">
               Branch <span className="text-red-600">*</span>
@@ -282,6 +305,7 @@ export default function ProfilePage() {
             )}
           </div>
 
+          {/* CGPA */}
           <div>
             <label className="block text-gray-700 font-medium">
               Aggregate CGPA <span className="text-red-600">*</span>
@@ -410,55 +434,43 @@ export default function ProfilePage() {
 
         {/* Save Button */}
         <div className="mt-6 flex justify-center">
-          {/* <button
+          <button
             onClick={handleSave}
-            disabled={loading}
-            className={`px-6 py-2 rounded-lg text-white font-semibold transition-transform ${
-              loading
+            disabled={loading || uploading}
+            className={`px-10 py-4 rounded-2xl text-white font-semibold shadow-md transition-transform duration-200 ease-out active:scale-95 ${
+              loading || uploading
                 ? "bg-sky-400 cursor-not-allowed"
                 : "bg-sky-600 hover:bg-sky-700 hover:scale-105 cursor-pointer"
             }`}
           >
-            {loading ? "Saving..." : "Save Profile"}
-          </button> */}
-          <button
-  onClick={handleSave}
-  disabled={loading}
-  className={`px-10 py-4 rounded-2xl text-white font-semibold shadow-md transition-transform duration-200 ease-out active:scale-95 ${
-    loading
-      ? "bg-sky-400 cursor-not-allowed"
-      : "bg-sky-600 hover:bg-sky-700 hover:scale-105 cursor-pointer"
-  }`}
->
-  {loading ? (
-    <span className="flex items-center justify-center gap-2">
-      <svg
-        className="w-5 h-5 animate-spin text-white"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-      >
-        <circle
-          className="opacity-25"
-          cx="12"
-          cy="12"
-          r="10"
-          stroke="currentColor"
-          strokeWidth="4"
-        ></circle>
-        <path
-          className="opacity-75"
-          fill="currentColor"
-          d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-        ></path>
-      </svg>
-      Saving...
-    </span>
-  ) : (
-    "Save Profile"
-  )}
-</button>
-
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <svg
+                  className="w-5 h-5 animate-spin text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                  ></path>
+                </svg>
+                {uploading ? "Please wait..." : "Saving..."}
+              </span>
+            ) : (
+              "Save Profile"
+            )}
+          </button>
         </div>
       </div>
     </div>
