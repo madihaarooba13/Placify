@@ -11,6 +11,7 @@
   "dependencies": {
     "@byteplus/vcloud-sdk-nodejs": "^1.0.5",
     "axios": "^1.13.2",
+    "cloudinary": "^2.8.0",
     "cross-fetch": "^4.1.0",
     "dotenv": "^17.2.3",
     "mongoose": "^8.19.3",
