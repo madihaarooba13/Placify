@@ -95,18 +95,17 @@ export default function AIChatbot() {
 
   return (
     <div className="min-h-screen bg-sky-50 flex flex-col items-center mt-32 sm:mt-24 md:mt-16 p-4 sm:p-6 md:p-10">
-      {/* ↑ increased mt for Samsung 8+ (was mt-24 → mt-32) */}
-
       <h1 className="text-3xl md:text-4xl font-bold mb-6 text-sky-800 text-center">
         AI Chatbot 🤖
       </h1>
 
       <div className="w-full max-w-4xl bg-white rounded-2xl shadow-lg flex flex-col overflow-hidden border border-gray-200 
                       h-[28rem] sm:h-[30rem] md:h-[32rem] lg:h-[34rem]">
-        {/* Chat messages */}
+        
+        {/* Chat messages (scrollable, smooth) */}
         <div
           ref={chatRef}
-          className="p-4 flex-1 overflow-y-auto space-y-4 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100"
+          className="p-4 flex-1 overflow-y-auto space-y-4 scroll-smooth scrollbar-thin scrollbar-thumb-sky-400 scrollbar-track-sky-100 hover:scrollbar-thumb-sky-500 transition-all duration-300 rounded-xl"
         >
           {messages.map((msg, idx) => (
             <div
