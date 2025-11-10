@@ -6,33 +6,10 @@ import { useSession, signIn, signOut } from "next-auth/react";
 const Navbar = () => {
   const { data: session } = useSession();
   const [open, setOpen] = useState(false);
-  const [username, setUsername] = useState("");
   const sidebarRef = useRef(null);
+  const [username, setUsername] = useState("");
 
-  // 🔹 Fetch updated username from profile (MongoDB)
-  useEffect(() => {
-    const fetchUsername = async () => {
-      if (!session?.user?.email) return;
-      try {
-        const res = await fetch("/api/profile");
-        if (res.ok) {
-          const data = await res.json();
-          if (data && data.email === session.user.email && data.username) {
-            setUsername(data.username); // ✅ Use saved username
-          } else {
-            // fallback to email prefix
-            setUsername(session.user.email.split("@")[0]);
-          }
-        }
-      } catch (err) {
-        console.error("Error fetching username:", err);
-        setUsername(session.user.email.split("@")[0]);
-      }
-    };
-    fetchUsername();
-  }, [session]);
-
-  // 🔹 Handle sidebar close on outside click
+  // Close sidebar when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
@@ -43,147 +20,102 @@ const Navbar = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // 🔄 Sync username (from profile/localStorage/session)
+  useEffect(() => {
+    if (session?.user?.email) {
+      const defaultUsername = session.user.email.split("@")[0];
+      const savedUsername = localStorage.getItem("placify_username");
+      setUsername(savedUsername || defaultUsername);
+    }
+  }, [session]);
+
+  // 🧠 Listen for profile updates in real-time
+  useEffect(() => {
+    const handleProfileUpdate = (e) => {
+      if (e.detail?.username) {
+        setUsername(e.detail.username);
+        localStorage.setItem("placify_username", e.detail.username);
+      }
+    };
+
+    window.addEventListener("profileUpdated", handleProfileUpdate);
+    return () => {
+      window.removeEventListener("profileUpdated", handleProfileUpdate);
+    };
+  }, []);
+
   return (
     <>
-      {/* Navbar */}
-      <nav className="bg-gradient-to-b from-sky-400 to-sky-600 text-white fixed w-full top-0 left-0 z-50 shadow-md h-24 sm:h-20 flex flex-col justify-center">
-        <div className="max-w-screen-xl w-full mx-auto flex flex-col sm:flex-row items-center justify-between px-4 py-2 sm:py-3 gap-1 sm:gap-0">
-          
-          {/* ===== MOBILE LAYOUT ===== */}
-          <div className="flex w-full items-center justify-between sm:hidden">
-            <Link
-              href="/"
-              className="flex items-center gap-2 hover:scale-105 transition-transform duration-200"
-            >
-              <img
-                src="tea.gif"
-                width={40}
-                height={40}
-                alt="Logo"
-                className="rounded-full"
-              />
-              <span className="text-base font-bold whitespace-nowrap">
-                Get Me a Chai!
-              </span>
-            </Link>
+      <nav className="bg-gradient-to-b from-sky-400 to-sky-600 text-white fixed w-full top-0 left-0 z-50 shadow-md">
+        <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto px-4 py-3 sm:py-4">
+          {/* Logo */}
+          <Link
+            href="/"
+            className="flex items-center gap-2 hover:scale-105 transition-transform duration-200"
+          >
+            <img
+              src="tea.gif"
+              width={40}
+              height={40}
+              alt="Logo"
+              className="rounded-full"
+            />
+            <span className="text-lg sm:text-xl font-bold whitespace-nowrap">
+              Get Me a Chai!
+            </span>
+          </Link>
 
-            <div className="flex items-center gap-2">
-              {session ? (
-                <button
-                  onClick={() => signOut()}
-                  className="bg-white text-black px-3 py-1.5 rounded-lg text-xs shadow-md hover:bg-gray-100 hover:scale-105 active:scale-95"
-                >
-                  Logout
-                </button>
-              ) : (
-                <Link href="/login">
-                  <button className="bg-white text-black px-3 py-1.5 rounded-lg text-xs shadow-md hover:bg-gray-100 hover:scale-105 active:scale-95">
-                    Login
-                  </button>
-                </Link>
-              )}
-
-              <button
-                onClick={() => setOpen(!open)}
-                aria-label="Toggle menu"
-                className="relative w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-md hover:scale-105 active:scale-95 transition-transform duration-300"
-              >
-                <div className="relative w-6 h-5 flex flex-col justify-between">
-                  <span
-                    className={`h-0.5 w-full bg-black rounded transition-all duration-300 ${
-                      open ? "rotate-45 translate-y-2" : ""
-                    }`}
-                  ></span>
-                  <span
-                    className={`h-0.5 w-full bg-black rounded transition-all duration-300 ${
-                      open ? "opacity-0" : ""
-                    }`}
-                  ></span>
-                  <span
-                    className={`h-0.5 w-full bg-black rounded transition-all duration-300 ${
-                      open ? "-rotate-45 -translate-y-2" : ""
-                    }`}
-                  ></span>
-                </div>
-              </button>
-            </div>
-          </div>
-
-          {/* Mobile welcome below */}
+          {/* Center Welcome (Responsive) */}
           {session && (
-            <div className="block sm:hidden w-full text-center mt-1">
-              <span className="text-sm font-semibold tracking-wide whitespace-nowrap">
-                Welcome,&nbsp;<span className="text-white/90">@{username}</span>
+            <div className="absolute left-1/2 -translate-x-1/2 text-center flex justify-center sm:static sm:translate-x-0 sm:flex-1 sm:justify-center mt-1 sm:mt-0">
+              <span className="text-sm sm:text-lg md:text-xl font-semibold tracking-wide whitespace-nowrap">
+                Welcome,&nbsp;
+                <span className="text-white/90">@{username}</span>
               </span>
             </div>
           )}
 
-          {/* ===== DESKTOP LAYOUT ===== */}
-          <div className="hidden sm:flex items-center justify-between w-full">
-            <Link
-              href="/"
-              className="flex items-center gap-2 hover:scale-105 transition-transform duration-200"
-            >
-              <img
-                src="tea.gif"
-                width={40}
-                height={40}
-                alt="Logo"
-                className="rounded-full"
-              />
-              <span className="text-lg font-bold whitespace-nowrap">
-                Get Me a Chai!
-              </span>
-            </Link>
-
-            {session && (
-              <div className="flex-1 text-center">
-                <span className="text-lg md:text-xl font-semibold whitespace-nowrap">
-                  Welcome,&nbsp;<span className="text-white/90">@{username}</span>
-                </span>
-              </div>
+          {/* Right Buttons */}
+          <div className="flex items-center gap-3 sm:gap-4 ml-auto">
+            {session ? (
+              <button
+                onClick={() => signOut()}
+                className="bg-white text-black px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-sm shadow-md transition-all duration-200 transform hover:bg-gray-100 hover:scale-105 active:scale-95"
+              >
+                Logout
+              </button>
+            ) : (
+              <Link href="/login">
+                <button className="bg-white text-black px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-sm shadow-md transition-all duration-200 transform hover:bg-gray-100 hover:scale-105 active:scale-95">
+                  Login
+                </button>
+              </Link>
             )}
 
-            <div className="flex items-center gap-4">
-              {session ? (
-                <button
-                  onClick={() => signOut()}
-                  className="bg-white text-black px-6 py-2 rounded-lg text-sm shadow-md hover:bg-gray-100 hover:scale-105 active:scale-95"
-                >
-                  Logout
-                </button>
-              ) : (
-                <Link href="/login">
-                  <button className="bg-white text-black px-6 py-2 rounded-lg text-sm shadow-md hover:bg-gray-100 hover:scale-105 active:scale-95">
-                    Login
-                  </button>
-                </Link>
-              )}
-
-              <button
-                onClick={() => setOpen(!open)}
-                aria-label="Toggle menu"
-                className="relative w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-md hover:scale-105 active:scale-95 transition-transform duration-300"
-              >
-                <div className="relative w-6 h-5 flex flex-col justify-between">
-                  <span
-                    className={`h-0.5 w-full bg-black rounded transition-all duration-300 ${
-                      open ? "rotate-45 translate-y-2" : ""
-                    }`}
-                  ></span>
-                  <span
-                    className={`h-0.5 w-full bg-black rounded transition-all duration-300 ${
-                      open ? "opacity-0" : ""
-                    }`}
-                  ></span>
-                  <span
-                    className={`h-0.5 w-full bg-black rounded transition-all duration-300 ${
-                      open ? "-rotate-45 -translate-y-2" : ""
-                    }`}
-                  ></span>
-                </div>
-              </button>
-            </div>
+            {/* Hamburger */}
+            <button
+              onClick={() => setOpen(!open)}
+              aria-label="Toggle menu"
+              className="relative w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-md hover:scale-105 active:scale-95 transition-transform duration-300"
+            >
+              <div className="relative w-6 h-5">
+                <span
+                  className={`absolute block h-0.5 w-6 bg-black transform transition-all duration-300 ease-in-out ${
+                    open ? "rotate-45 top-2.5" : "top-0"
+                  }`}
+                ></span>
+                <span
+                  className={`absolute block h-0.5 w-6 bg-black top-2.5 transition-all duration-300 ease-in-out ${
+                    open ? "opacity-0" : "opacity-100"
+                  }`}
+                ></span>
+                <span
+                  className={`absolute block h-0.5 w-6 bg-black transform transition-all duration-300 ease-in-out ${
+                    open ? "-rotate-45 top-2.5" : "top-5"
+                  }`}
+                ></span>
+              </div>
+            </button>
           </div>
         </div>
       </nav>
