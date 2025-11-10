@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useSession, signIn } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -90,10 +90,11 @@ export default function ProfilePage() {
     }
   };
 
-  // Resume upload handler
+  // ✅ Resume upload handler
   const handleResumeUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
     if (file.size > 5 * 1024 * 1024) {
       toast.warn("Resume too large! Max size 5MB ⚠️");
       return;
@@ -148,11 +149,6 @@ export default function ProfilePage() {
       return;
     }
 
-    if (uploading) {
-      toast.warn("Please wait, resume is still uploading ⏳");
-      return;
-    }
-
     setLoading(true);
     toast.info("Saving your profile...");
 
@@ -168,16 +164,14 @@ export default function ProfilePage() {
       if (res.ok) {
         toast.success("Profile saved successfully ✅");
 
-        // Update username globally for Navbar
-        localStorage.setItem("placify_username", formData.username);
-        window.dispatchEvent(
-          new CustomEvent("profileUpdated", { detail: { username: formData.username } })
-        );
+        // Dispatch username change event for navbar update
+        const event = new CustomEvent("profileUpdated", {
+          detail: { username: payload.username },
+        });
+        window.dispatchEvent(event);
 
-        // Redirect after delay
-        setTimeout(() => {
-          router.push("/dashboard");
-        }, 1200);
+        // Redirect to dashboard after success
+        setTimeout(() => router.push("/dashboard"), 1500);
       } else {
         toast.error(data.message || "Save failed ❌");
       }
@@ -189,13 +183,18 @@ export default function ProfilePage() {
     }
   };
 
+  // 🚀 Show login screen if not logged in
   if (!session) {
     return (
-      <div className="min-h-screen flex flex-col justify-center items-center">
-        <p className="text-gray-600 mb-4">Please log in to view your profile.</p>
+      <div className="min-h-screen flex flex-col justify-center items-center bg-sky-50">
+        <p className="text-gray-600 mb-4 text-lg font-medium">
+          Please log in to view your profile.
+        </p>
         <button
-          onClick={() => signIn()}
-          className="bg-sky-600 text-white px-6 py-3 rounded-xl hover:bg-sky-700 transition"
+          onClick={() => router.push("/login")}
+          className="bg-sky-600 text-white px-6 py-3 rounded-xl 
+                     hover:bg-sky-700 hover:scale-105 cursor-pointer 
+                     transition-all duration-200 shadow-md active:scale-95"
         >
           Login
         </button>
@@ -212,9 +211,8 @@ export default function ProfilePage() {
           <span className="text-red-600">*</span> are required.
         </p>
 
-        {/* ---------- FORM SECTION ---------- */}
+        {/* Basic Info */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Email */}
           <div>
             <label className="block text-gray-700 font-medium">Email</label>
             <input
@@ -224,7 +222,6 @@ export default function ProfilePage() {
             />
           </div>
 
-          {/* Username */}
           <div>
             <label className="block text-gray-700 font-medium">
               Username <span className="text-red-600">*</span>
@@ -244,7 +241,6 @@ export default function ProfilePage() {
             )}
           </div>
 
-          {/* Full Name */}
           <div>
             <label className="block text-gray-700 font-medium">
               Full Name <span className="text-red-600">*</span>
@@ -265,7 +261,6 @@ export default function ProfilePage() {
             )}
           </div>
 
-          {/* College */}
           <div>
             <label className="block text-gray-700 font-medium">
               College <span className="text-red-600">*</span>
@@ -278,7 +273,6 @@ export default function ProfilePage() {
             />
           </div>
 
-          {/* Branch */}
           <div>
             <label className="block text-gray-700 font-medium">
               Branch <span className="text-red-600">*</span>
@@ -305,7 +299,6 @@ export default function ProfilePage() {
             )}
           </div>
 
-          {/* CGPA */}
           <div>
             <label className="block text-gray-700 font-medium">
               Aggregate CGPA <span className="text-red-600">*</span>
@@ -465,7 +458,7 @@ export default function ProfilePage() {
                     d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
                   ></path>
                 </svg>
-                {uploading ? "Please wait..." : "Saving..."}
+                Saving...
               </span>
             ) : (
               "Save Profile"
