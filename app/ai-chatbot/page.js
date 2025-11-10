@@ -12,7 +12,6 @@ export default function AIChatbot() {
   const [loading, setLoading] = useState(false);
   const chatRef = useRef(null);
 
-  // ✅ Send message to OpenRouter backend
   const handleSend = async () => {
     if (!input.trim() || loading) return;
 
@@ -31,7 +30,6 @@ export default function AIChatbot() {
       const data = await response.json();
       let aiText = data?.text?.trim();
 
-      // 🧠 Use fallback ONLY if API gives no useful answer
       if (!aiText || aiText.length < 5 || aiText.includes("error")) {
         const dummyReplies = [
           "Hmm 🤔 interesting question! I'd suggest researching more and staying consistent.",
@@ -69,7 +67,6 @@ export default function AIChatbot() {
     }
   };
 
-  // ✅ Handle Enter key
   const handleKeyPress = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -77,20 +74,18 @@ export default function AIChatbot() {
     }
   };
 
-  // ✅ Auto-scroll when new messages appear
   useEffect(() => {
     if (chatRef.current) {
       chatRef.current.scrollTop = chatRef.current.scrollHeight;
     }
   }, [messages, loading]);
 
-  // ✅ Login requirement
   if (!session) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <button
           onClick={() => signIn()}
-          className="bg-sky-600 text-white px-6 py-3 rounded-xl hover:bg-sky-700 transition"
+          className="bg-sky-600 text-white px-6 py-3 rounded-xl hover:bg-sky-700 transition cursor-pointer"
         >
           Please login to access AI Chatbot
         </button>
@@ -98,18 +93,20 @@ export default function AIChatbot() {
     );
   }
 
-  // ✅ Chat UI
   return (
-    <div className="min-h-screen bg-sky-50 flex flex-col items-center my-20 p-6 md:p-20">
+    <div className="min-h-screen bg-sky-50 flex flex-col items-center mt-32 sm:mt-24 md:mt-16 p-4 sm:p-6 md:p-10">
+      {/* ↑ increased mt for Samsung 8+ (was mt-24 → mt-32) */}
+
       <h1 className="text-3xl md:text-4xl font-bold mb-6 text-sky-800 text-center">
         AI Chatbot 🤖
       </h1>
 
-      <div className="w-full max-w-2xl bg-white rounded-2xl shadow-lg flex flex-col overflow-hidden border border-gray-200">
+      <div className="w-full max-w-4xl bg-white rounded-2xl shadow-lg flex flex-col overflow-hidden border border-gray-200 
+                      h-[28rem] sm:h-[30rem] md:h-[32rem] lg:h-[34rem]">
         {/* Chat messages */}
         <div
           ref={chatRef}
-          className="p-4 flex-1 overflow-y-auto h-[28rem] space-y-4 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100"
+          className="p-4 flex-1 overflow-y-auto space-y-4 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100"
         >
           {messages.map((msg, idx) => (
             <div
@@ -119,16 +116,16 @@ export default function AIChatbot() {
               } gap-2`}
             >
               <div
-                className={`w-10 h-10 flex items-center justify-center font-bold rounded-full ${
+                className={`min-w-[40px] h-10 flex items-center justify-center font-bold rounded-full px-3 ${
                   msg.sender === "user"
                     ? "bg-sky-600 text-white"
                     : "bg-gray-300 text-gray-800"
                 }`}
               >
-                {msg.sender === "user" ? "S" : "T"}
+                {msg.sender === "user" ? "S" : "AI"}
               </div>
               <div
-                className={`p-3 rounded-xl max-w-xs break-words ${
+                className={`p-3 rounded-xl max-w-[80%] break-words ${
                   msg.sender === "user"
                     ? "bg-sky-600 text-white rounded-br-none"
                     : "bg-gray-200 text-gray-800 rounded-bl-none"
@@ -141,8 +138,8 @@ export default function AIChatbot() {
 
           {loading && (
             <div className="flex items-start gap-2">
-              <div className="w-10 h-10 flex items-center justify-center bg-gray-300 text-gray-800 font-bold rounded-full">
-                T
+              <div className="min-w-[40px] h-10 flex items-center justify-center bg-gray-300 text-gray-800 font-bold rounded-full px-3">
+                AI
               </div>
               <div className="p-3 rounded-xl max-w-xs break-words bg-gray-200 text-gray-800 rounded-bl-none animate-pulse">
                 AI is typing... ⏳
@@ -152,20 +149,20 @@ export default function AIChatbot() {
         </div>
 
         {/* Input box */}
-        <div className="p-4 border-t border-gray-300 flex gap-2">
+        <div className="p-3 sm:p-4 border-t border-gray-300 flex gap-2">
           <textarea
             rows="1"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyPress}
             placeholder="Type your question..."
-            className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-400 text-gray-800 text-lg resize-none"
+            className="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-400 text-gray-800 text-base resize-none"
           />
           <button
             onClick={handleSend}
             disabled={loading}
-            className={`bg-sky-600 text-white px-5 py-3 rounded-xl font-semibold hover:bg-sky-700 transition ${
-              loading ? "opacity-50 cursor-not-allowed" : ""
+            className={`bg-sky-600 text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-sky-700 transition ${
+              loading ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
             }`}
           >
             Send
