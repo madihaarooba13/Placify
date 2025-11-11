@@ -9,15 +9,16 @@ export default function TeacherDashboard() {
   const [students, setStudents] = useState([]);
   const [isAvailable, setIsAvailable] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [animateFeedback, setAnimateFeedback] = useState(null);
 
-  // Redirect unauthorized users
+  // ✅ Auth Check
   useEffect(() => {
     if (status === "loading") return;
     if (!session) router.push("/login");
     else if (session.user.role !== "teacher") router.push("/profile");
   }, [session, status, router]);
 
-  // Fetch all students from DB
+  // ✅ Fetch All Students
   useEffect(() => {
     const fetchStudents = async () => {
       try {
@@ -37,20 +38,50 @@ export default function TeacherDashboard() {
     setIsAvailable((prev) => !prev);
   };
 
-  const handleRating = async (email, rating, feedback) => {
+  // ✅ Submit feedback + instantly update UI
+  const handleRating = async (email, rating, feedbackText) => {
+    if (!rating || !feedbackText.trim()) {
+      alert("Please fill both rating and feedback!");
+      return;
+    }
+
     try {
-      await fetch("/api/assign", {
+      const res = await fetch("/api/assign", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, rating, feedback }),
+        body: JSON.stringify({ email, rating, feedback: feedbackText }),
       });
-      alert("✅ Feedback submitted successfully!");
+
+      if (res.ok) {
+        const date = new Date();
+
+        // ✨ Update UI instantly
+        setStudents((prev) =>
+          prev.map((student) =>
+            student.email === email
+              ? {
+                  ...student,
+                  feedback: { rating, feedback: feedbackText, date },
+                }
+              : student
+          )
+        );
+
+        // 🎇 Add glow animation for updated card
+        setAnimateFeedback(email);
+        setTimeout(() => setAnimateFeedback(null), 1200);
+
+        alert("✅ Feedback submitted successfully!");
+      } else {
+        alert("❌ Failed to submit feedback");
+      }
     } catch (err) {
       console.error(err);
       alert("Something went wrong!");
     }
   };
 
+  // ✅ Loading
   if (loading)
     return (
       <div className="min-h-screen flex justify-center items-center text-lg text-sky-700 font-semibold">
@@ -58,56 +89,89 @@ export default function TeacherDashboard() {
       </div>
     );
 
+  // ✅ Main UI
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 p-8">
+      {/* Header */}
       <header className="flex flex-col md:flex-row justify-between items-center mb-10 border-b pb-4">
         <div>
           <h1 className="text-3xl font-bold text-sky-800">
             Welcome, {session?.user?.name || "Teacher"} 👩‍🏫
           </h1>
           <p className="text-gray-600 mt-2">
-            Manage student progress, give feedback, and guide them better 🌱
+            Manage student progress, guide them & track performance 🌱
           </p>
         </div>
 
         <button
           onClick={handleAvailabilityToggle}
-          className={`mt-4 md:mt-0 px-5 py-2 rounded-xl font-semibold text-white ${
-            isAvailable ? "bg-green-600 hover:bg-green-700" : "bg-gray-400 hover:bg-gray-500"
-          } transition`}
+          className={`mt-4 md:mt-0 px-5 py-2 rounded-xl font-semibold text-white transition ${
+            isAvailable
+              ? "bg-green-600 hover:bg-green-700"
+              : "bg-gray-400 hover:bg-gray-500"
+          }`}
         >
           {isAvailable ? "🟢 Available for Chat" : "🔴 Mark Available"}
         </button>
       </header>
 
+      {/* Students List */}
       <section>
         <h2 className="text-2xl font-semibold text-sky-700 mb-6">
           All Students 👩‍🎓👨‍🎓
         </h2>
 
         {students.length === 0 ? (
-          <p className="text-gray-600 text-center">
-            No students found yet.
-          </p>
+          <p className="text-gray-600 text-center">No students found yet.</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {students.map((student, idx) => (
               <div
                 key={idx}
-                className="bg-white p-6 rounded-2xl shadow-md border-t-4 border-sky-400 hover:shadow-xl transition"
+                className={`bg-white p-6 rounded-2xl shadow-md border-t-4 border-sky-400 hover:shadow-xl transition relative ${
+                  animateFeedback === student.email
+                    ? "ring-4 ring-green-300 ring-opacity-60"
+                    : ""
+                }`}
               >
+                {/* 🧾 Student Info */}
                 <h3 className="text-lg font-semibold text-sky-800">
                   {student.username}
                 </h3>
                 <p className="text-gray-600 text-sm">{student.email}</p>
                 <p className="text-sm mt-1">
+                  <strong>Enrollment:</strong> {student.enrollment || "N/A"}
+                </p>
+                <p className="text-sm">
                   <strong>Branch:</strong> {student.branch || "N/A"}
                 </p>
                 <p className="text-sm">
                   <strong>CGPA:</strong> {student.cgpa || "N/A"}
                 </p>
 
-                {/* Feedback form */}
+                {/* 🗒 Latest Feedback */}
+                {student.feedback ? (
+                  <div className="mt-3 bg-gradient-to-b from-sky-50 to-sky-100 border border-sky-200 rounded-xl p-3 transition-all duration-500">
+                    <p className="text-xs text-gray-500 mb-1 font-medium">
+                      Latest Feedback:
+                    </p>
+                    <p className="text-sm text-gray-700">
+                      <strong>⭐ Rating:</strong> {student.feedback.rating}/10
+                    </p>
+                    <p className="text-sm text-gray-700 italic">
+                      "{student.feedback.feedback}"
+                    </p>
+                    <p className="text-xs text-gray-400 text-right">
+                      {new Date(student.feedback.date).toLocaleDateString()}
+                    </p>
+                  </div>
+                ) : (
+                  <p className="mt-3 text-xs text-gray-400 italic">
+                    No feedback yet
+                  </p>
+                )}
+
+                {/* ✏️ Feedback Form */}
                 <div className="mt-4">
                   <input
                     type="number"
@@ -136,6 +200,16 @@ export default function TeacherDashboard() {
                     Submit Feedback
                   </button>
                 </div>
+
+                {/* 🔍 View Details */}
+                <button
+                  onClick={() =>
+                    router.push(`/teacher/student/${student.email}`)
+                  }
+                  className="mt-4 bg-sky-100 hover:bg-sky-200 text-sky-700 w-full py-2 rounded-lg font-semibold transition"
+                >
+                  🔍 View Details
+                </button>
               </div>
             ))}
           </div>
