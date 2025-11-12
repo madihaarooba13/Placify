@@ -2100,9 +2100,9 @@ const Navbar = () => {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search this page..."
-            className="flex-1 px-3 py-1.5 rounded-md border border-gray-300 text-gray-700 focus:ring-2 focus:ring-sky-400 outline-none text-sm"
+            className="flex-1 px-3 py-1.5 rounded-md border border-gray-300 text-gray-700 focus:ring-2 focus:ring-sky-400 outline-none text-sm "
           />
-          <span className="text-gray-600 text-xs font-semibold min-w-[60px] text-center">
+          <span className="text-gray-600 text-xs font-semibold min-w-[55px] text-center">
             {matches.length ? `${currentIndex + 1} / ${matches.length}` : "0 / 0"}
           </span>
           <button onClick={prev} disabled={!matches.length} className="px-2 py-1 rounded text-xs bg-gray-200 hover:bg-gray-300 cursor-pointer">↑</button>
