@@ -279,7 +279,7 @@ export default function ChatWithMentor() {
   };
 
   return (
-    <main className="mt-30 flex justify-center items-center min-h-[80vh] px-4">
+    <main className="mt-30 flex justify-center items-center min-h-[80vh] px-4 mt-37 lg:mt-30">
       {!isMounted ? (
         <div className="text-center mt-32 text-gray-500">Loading chat...</div>
       ) : (

@@ -211,7 +211,7 @@ export default function PerformanceInsightPage() {
     );
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-sky-50 p-8">
+    <main className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-sky-50 p-8 mt-35 lg:mt-25">
       <header className="mb-10 text-center">
         <h1 className="text-3xl font-bold text-emerald-700">
           📊 Student Performance Insights

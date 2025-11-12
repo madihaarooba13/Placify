@@ -91,7 +91,7 @@ export default function TeacherDashboard() {
 
   // ✅ Main UI
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 p-8">
+    <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 p-8 mt-32 lg:mt-22">
       {/* Header */}
       <header className="flex flex-col md:flex-row justify-between items-center mb-10 border-b pb-4">
         <div>

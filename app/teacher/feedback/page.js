@@ -268,7 +268,7 @@ export default function TeacherFullFeedbackPage() {
     );
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-sky-50 p-8">
+    <main className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-sky-50 p-8 mt-35 lg:mt-25">
       <h1 className="text-3xl font-bold text-center text-sky-800 mb-6">
         🧑‍🏫 Teacher Skill & Feedback Control
       </h1>

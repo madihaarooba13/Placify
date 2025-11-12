@@ -35,7 +35,7 @@ const SupportPage = () => {
   ];
 
   return (
-    <main className="min-h-screen bg-sky-50 p-20">
+    <main className="min-h-screen bg-sky-50 p-20 mt-4 ">
       {/* Hero Section */}
       <section className="text-center py-16">
         <h1 className="text-4xl md:text-5xl font-bold text-sky-800 mb-4">
