@@ -69,6 +69,7 @@ const Navbar = () => {
     { href: "/ai-chatbot", label: "🤖 AI Chatbot" },
     // { href: "/teacher-guidance", label: "🎓 Teacher Guidance" },
     { href: "/preparation", label: "🎓Preparation with Teachers" },
+    { href: "/chat-with-mentor", label: "🧑‍🏫Chat with Mentor" }, 
     { href: "/support", label: "🛠️ Support" },
   ];
 
@@ -76,7 +77,7 @@ const Navbar = () => {
     { href: "/teacher/dashboard", label: "👩‍🏫 Teacher Dashboard" },
     { href: "/teacher/tasks", label: "📝 Manage Tasks" },
     { href: "/teacher-feedback", label: "📈 Student Reviews" },
-    { href: "/teacher-chat", label: "💬 Chat with Students" },
+    { href: "/teacher/chat", label: "💬 Chat with Students" },
     { href: "/teacher-insights", label: "🧠 Performance Insights" },
   ];
 
