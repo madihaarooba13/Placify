@@ -76,7 +76,7 @@ const Navbar = () => {
   const teacherPanel = [
     { href: "/teacher/dashboard", label: "👩‍🏫 Teacher Dashboard" },
     { href: "/teacher/tasks", label: "📝 Manage Tasks" },
-    { href: "/teacher-feedback", label: "📈 Student Reviews" },
+    { href: "/teacher/feedback", label: "📈 Student Reviews" },
     { href: "/teacher/chat", label: "💬 Chat with Students" },
     { href: "/teacher/Performance-InsightPage", label: "🧠 Performance Insights" },
   ];
