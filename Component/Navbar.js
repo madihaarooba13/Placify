@@ -78,7 +78,7 @@ const Navbar = () => {
     { href: "/teacher/tasks", label: "📝 Manage Tasks" },
     { href: "/teacher-feedback", label: "📈 Student Reviews" },
     { href: "/teacher/chat", label: "💬 Chat with Students" },
-    { href: "/teacher-insights", label: "🧠 Performance Insights" },
+    { href: "/teacher/Performance-InsightPage", label: "🧠 Performance Insights" },
   ];
 
   return (

@@ -518,8 +518,8 @@ export default function PreparationModulePage() {
                 {quizzes.map((quiz, idx) => (
                   <tr
                     key={quiz._id || idx}
-                    className="border-t hover:bg-emerald-50 transition-all duration-200 cursor-pointer"
-                    onClick={() => router.push(`/dashboard/quizzes/${quiz._id}`)}
+                    className="border-t hover:bg-emerald-50 transition-all duration-200 "
+                    // onClick={() => router.push(`/dashboard/quizzes/${quiz._id}`)}
                   >
                     <td className="px-4 py-3">{idx + 1}</td>
                     <td className="px-4 py-3 font-medium text-emerald-700 underline">

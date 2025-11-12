@@ -1,25 +1,72 @@
+// // // // import { NextResponse } from "next/server";
+// // // // import dbConnect from "@/lib/dbConnect";
+// // // // import SkillProfile from "@/models/SkillProfile";
+
+// // // // export async function POST(req) {
+// // // //   try {
+// // // //     const { quizId, userEmail, answers } = await req.json();
+// // // //     await dbConnect();
+
+// // // //     const profile = await SkillProfile.findOne({ "quizzes._id": quizId });
+// // // //     if (!profile) return NextResponse.json({ error: "Quiz not found" }, { status: 404 });
+
+// // // //     const quiz = profile.quizzes.id(quizId);
+// // // //     if (!quiz) return NextResponse.json({ error: "Quiz not found" }, { status: 404 });
+
+// // // //     // ✅ calculate score
+// // // //     let score = 0;
+// // // //     quiz.quiz.forEach((q, i) => {
+// // // //       if (answers[i] === q.correctAnswer) score++;
+// // // //     });
+
+// // // //     // ✅ save attempt
+// // // //     quiz.attempts.push({
+// // // //       userEmail,
+// // // //       answers,
+// // // //       score,
+// // // //       submittedAt: new Date(),
+// // // //     });
+
+// // // //     await profile.save();
+
+// // // //     return NextResponse.json({ success: true, score });
+// // // //   } catch (err) {
+// // // //     return NextResponse.json({ error: err.message }, { status: 500 });
+// // // //   }
+// // // // }
 // // // import { NextResponse } from "next/server";
-// // // import dbConnect from "@/lib/dbConnect";
+// // // import connectDB from "@/db/createDB";
 // // // import SkillProfile from "@/models/SkillProfile";
 
 // // // export async function POST(req) {
+// // //   await connectDB();
+
 // // //   try {
-// // //     const { quizId, userEmail, answers } = await req.json();
-// // //     await dbConnect();
+// // //     const { userEmail, quizId, answers, score } = await req.json();
 
+// // //     if (!userEmail || !quizId) {
+// // //       return NextResponse.json(
+// // //         { error: "Missing userEmail or quizId" },
+// // //         { status: 400 }
+// // //       );
+// // //     }
+
+// // //     // 🔍 Find the profile containing the quiz
 // // //     const profile = await SkillProfile.findOne({ "quizzes._id": quizId });
-// // //     if (!profile) return NextResponse.json({ error: "Quiz not found" }, { status: 404 });
+// // //     if (!profile) {
+// // //       return NextResponse.json({ error: "Quiz not found" }, { status: 404 });
+// // //     }
 
+// // //     // 🎯 Get quiz from embedded quizzes array
 // // //     const quiz = profile.quizzes.id(quizId);
-// // //     if (!quiz) return NextResponse.json({ error: "Quiz not found" }, { status: 404 });
+// // //     if (!quiz) {
+// // //       return NextResponse.json(
+// // //         { error: "Quiz not found inside profile" },
+// // //         { status: 404 }
+// // //       );
+// // //     }
 
-// // //     // ✅ calculate score
-// // //     let score = 0;
-// // //     quiz.quiz.forEach((q, i) => {
-// // //       if (answers[i] === q.correctAnswer) score++;
-// // //     });
-
-// // //     // ✅ save attempt
+// // //     // 🧠 Add attempt info
 // // //     quiz.attempts.push({
 // // //       userEmail,
 // // //       answers,
@@ -29,11 +76,18 @@
 
 // // //     await profile.save();
 
-// // //     return NextResponse.json({ success: true, score });
+// // //     console.log("✅ Quiz result saved:", { userEmail, score });
+
+// // //     return NextResponse.json({ message: "Result saved successfully ✅" });
 // // //   } catch (err) {
-// // //     return NextResponse.json({ error: err.message }, { status: 500 });
+// // //     console.error("❌ Error saving quiz result:", err);
+// // //     return NextResponse.json(
+// // //       { error: "Server error while saving result" },
+// // //       { status: 500 }
+// // //     );
 // // //   }
 // // // }
+
 // // import { NextResponse } from "next/server";
 // // import connectDB from "@/db/createDB";
 // // import SkillProfile from "@/models/SkillProfile";
@@ -44,6 +98,8 @@
 // //   try {
 // //     const { userEmail, quizId, answers, score } = await req.json();
 
+// //     console.log("📩 Incoming submission:", { userEmail, quizId, answers, score });
+
 // //     if (!userEmail || !quizId) {
 // //       return NextResponse.json(
 // //         { error: "Missing userEmail or quizId" },
@@ -51,22 +107,21 @@
 // //       );
 // //     }
 
-// //     // 🔍 Find the profile containing the quiz
+// //     // 🧩 Find the profile that contains this quiz
 // //     const profile = await SkillProfile.findOne({ "quizzes._id": quizId });
 // //     if (!profile) {
+// //       console.log("❌ No SkillProfile found for quiz ID:", quizId);
 // //       return NextResponse.json({ error: "Quiz not found" }, { status: 404 });
 // //     }
 
-// //     // 🎯 Get quiz from embedded quizzes array
+// //     // 🧩 Find the quiz within the profile
 // //     const quiz = profile.quizzes.id(quizId);
 // //     if (!quiz) {
-// //       return NextResponse.json(
-// //         { error: "Quiz not found inside profile" },
-// //         { status: 404 }
-// //       );
+// //       console.log("❌ Quiz not found inside quizzes[] in SkillProfile");
+// //       return NextResponse.json({ error: "Quiz not found in profile" }, { status: 404 });
 // //     }
 
-// //     // 🧠 Add attempt info
+// //     // ✅ Push attempt
 // //     quiz.attempts.push({
 // //       userEmail,
 // //       answers,
@@ -74,9 +129,10 @@
 // //       submittedAt: new Date(),
 // //     });
 
-// //     await profile.save();
+// //     console.log("✅ Attempt pushed successfully:", quiz.attempts.slice(-1)[0]);
 
-// //     console.log("✅ Quiz result saved:", { userEmail, score });
+// //     await profile.save();
+// //     console.log("💾 Profile saved successfully for user:", userEmail);
 
 // //     return NextResponse.json({ message: "Result saved successfully ✅" });
 // //   } catch (err) {
@@ -87,7 +143,6 @@
 // //     );
 // //   }
 // // }
-
 // import { NextResponse } from "next/server";
 // import connectDB from "@/db/createDB";
 // import SkillProfile from "@/models/SkillProfile";
@@ -96,6 +151,7 @@
 //   await connectDB();
 
 //   try {
+//     // 🧩 Step 1: Get data from frontend
 //     const { userEmail, quizId, answers, score } = await req.json();
 
 //     console.log("📩 Incoming submission:", { userEmail, quizId, answers, score });
@@ -107,34 +163,53 @@
 //       );
 //     }
 
-//     // 🧩 Find the profile that contains this quiz
+//     // 🧩 Step 2: Find the user profile that contains this quiz
 //     const profile = await SkillProfile.findOne({ "quizzes._id": quizId });
+
 //     if (!profile) {
 //       console.log("❌ No SkillProfile found for quiz ID:", quizId);
 //       return NextResponse.json({ error: "Quiz not found" }, { status: 404 });
 //     }
 
-//     // 🧩 Find the quiz within the profile
+//     console.log("🧩 Step 3: Profile found for user:", profile.userId);
+
+//     // 🧩 Step 3: Extract the quiz object from that profile
 //     const quiz = profile.quizzes.id(quizId);
+
 //     if (!quiz) {
 //       console.log("❌ Quiz not found inside quizzes[] in SkillProfile");
-//       return NextResponse.json({ error: "Quiz not found in profile" }, { status: 404 });
+//       return NextResponse.json({ error: "Quiz not found inside profile" }, { status: 404 });
 //     }
 
-//     // ✅ Push attempt
-//     quiz.attempts.push({
+//     console.log("🧠 Step 4: Quiz title:", quiz.title);
+
+//     // 🩵 Step 5: If old quiz doesn't have 'attempts' array, fix it
+//     if (!quiz.attempts) {
+//       console.log("⚠️ 'attempts' field missing — initializing empty array");
+//       quiz.attempts = [];
+//     }
+
+//     // 🧩 Step 6: Add the new attempt entry
+//     const newAttempt = {
 //       userEmail,
 //       answers,
 //       score,
 //       submittedAt: new Date(),
-//     });
+//     };
 
-//     console.log("✅ Attempt pushed successfully:", quiz.attempts.slice(-1)[0]);
+//     quiz.attempts.push(newAttempt);
 
+//     console.log("✅ Step 7: Attempt pushed successfully:", newAttempt);
+
+//     // 🧩 Step 8: Save the updated profile
 //     await profile.save();
-//     console.log("💾 Profile saved successfully for user:", userEmail);
 
-//     return NextResponse.json({ message: "Result saved successfully ✅" });
+//     console.log("💾 Step 9: Profile saved successfully for:", userEmail);
+
+//     return NextResponse.json({
+//       message: "Result saved successfully ✅",
+//       attempt: newAttempt,
+//     });
 //   } catch (err) {
 //     console.error("❌ Error saving quiz result:", err);
 //     return NextResponse.json(
@@ -151,10 +226,7 @@ export async function POST(req) {
   await connectDB();
 
   try {
-    // 🧩 Step 1: Get data from frontend
     const { userEmail, quizId, answers, score } = await req.json();
-
-    console.log("📩 Incoming submission:", { userEmail, quizId, answers, score });
 
     if (!userEmail || !quizId) {
       return NextResponse.json(
@@ -163,57 +235,57 @@ export async function POST(req) {
       );
     }
 
-    // 🧩 Step 2: Find the user profile that contains this quiz
-    const profile = await SkillProfile.findOne({ "quizzes._id": quizId });
+    console.log("📥 [Quiz Submit] Received:", { userEmail, quizId, score });
 
+    // 🔍 Find user profile
+    const profile = await SkillProfile.findOne({ userId: userEmail });
     if (!profile) {
-      console.log("❌ No SkillProfile found for quiz ID:", quizId);
+      return NextResponse.json(
+        { error: "Skill profile not found" },
+        { status: 404 }
+      );
+    }
+
+    // 🎯 Locate quiz by ID
+    const quiz = profile.quizzes.id(quizId);
+    if (!quiz) {
       return NextResponse.json({ error: "Quiz not found" }, { status: 404 });
     }
 
-    console.log("🧩 Step 3: Profile found for user:", profile.userId);
-
-    // 🧩 Step 3: Extract the quiz object from that profile
-    const quiz = profile.quizzes.id(quizId);
-
-    if (!quiz) {
-      console.log("❌ Quiz not found inside quizzes[] in SkillProfile");
-      return NextResponse.json({ error: "Quiz not found inside profile" }, { status: 404 });
+    // 🧠 Check if already attempted
+    const alreadyAttempted = quiz.attempts.some(
+      (a) => a.userEmail === userEmail
+    );
+    if (alreadyAttempted) {
+      console.log("⚠️ Already attempted by:", userEmail);
+      return NextResponse.json({ message: "Already attempted" }, { status: 200 });
     }
 
-    console.log("🧠 Step 4: Quiz title:", quiz.title);
-
-    // 🩵 Step 5: If old quiz doesn't have 'attempts' array, fix it
-    if (!quiz.attempts) {
-      console.log("⚠️ 'attempts' field missing — initializing empty array");
-      quiz.attempts = [];
-    }
-
-    // 🧩 Step 6: Add the new attempt entry
-    const newAttempt = {
+    // ✅ Save attempt
+    quiz.attempts.push({
       userEmail,
       answers,
       score,
       submittedAt: new Date(),
-    };
+    });
 
-    quiz.attempts.push(newAttempt);
+    // ✅ Mark quiz completed
+    quiz.completed = true;
 
-    console.log("✅ Step 7: Attempt pushed successfully:", newAttempt);
-
-    // 🧩 Step 8: Save the updated profile
     await profile.save();
 
-    console.log("💾 Step 9: Profile saved successfully for:", userEmail);
+    console.log("✅ Quiz saved:", { quizId: quiz._id, completed: quiz.completed });
 
     return NextResponse.json({
-      message: "Result saved successfully ✅",
-      attempt: newAttempt,
+      success: true,
+      message: "Quiz submission saved!",
+      completed: true,
+      score,
     });
-  } catch (err) {
-    console.error("❌ Error saving quiz result:", err);
+  } catch (error) {
+    console.error("🔥 [Quiz Submit] Error:", error);
     return NextResponse.json(
-      { error: "Server error while saving result" },
+      { error: "Server error", details: error.message },
       { status: 500 }
     );
   }
